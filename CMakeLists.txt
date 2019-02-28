@@ -14,16 +14,18 @@ find_package(Threads REQUIRED)
 add_executable(metricq-source-hdeem)
 target_sources(metricq-source-hdeem PUBLIC
     src/main.cpp
+    src/hdeem_source.cpp
+    src/hdeem_connection.cpp
 )
 target_compile_features(metricq-source-hdeem PUBLIC cxx_std_17)
 target_link_libraries(metricq-source-hdeem
     PUBLIC
         asio
-        Nitro::log
-        Nitro::jiffy
         metricq::source
+        metricq::logger-nitro
         Threads::Threads
         json::json
+        hdeem::cxx
 )
 target_compile_options(metricq-source-hdeem
     PUBLIC
