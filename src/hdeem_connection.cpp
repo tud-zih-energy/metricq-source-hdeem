@@ -108,7 +108,7 @@ static std::vector<HDEEMMetric> initialize_metrics(hdeem::connection& connection
         {
             if (connection.sensor_real_name(hdeem_id) == sensor_upper)
             {
-                std::string metric = nitro::format("{}.{}") % prefix % sensor;
+                std::string metric = nitro::format("{}.{}.power") % prefix % sensor;
                 metrics.emplace_back(std::move(metric), hdeem_id);
                 found = true;
             }
