@@ -73,6 +73,7 @@ void HDEEMSource::on_source_config(const metricq::json& config)
 
                 auto& metric = (*this)[metric_name];
                 metric.metadata.unit("W");
+                metric.chunk_size(10);
             }
         }
     }
@@ -115,7 +116,6 @@ void HDEEMSource::on_closed()
 
 void HDEEMSource::async_send(const std::string& metric, metricq::TimePoint timestamp, double value)
 {
-
     // post this as a new task, so we can cross thread boundaries
     io_service.post([metric, timestamp, value, this]() {
         if (!this->send_possible_)

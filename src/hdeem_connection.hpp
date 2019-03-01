@@ -11,6 +11,15 @@ class HDEEMSource;
 class HDEEMConnection
 {
 public:
+    HDEEMConnection(HDEEMSource& source, const std::string& metric_prefix,
+                    const std::string& bmc_host, const std::string& bmc_user,
+                    const std::string& bmc_pw, const metricq::json& sensors,
+                    std::chrono::milliseconds interval)
+    : source_(source), metric_prefix_(metric_prefix), bmc_host_(bmc_host), bmc_user_(bmc_user),
+      bmc_pw_(bmc_pw), sensors_(sensors), interval_(interval)
+    {
+    }
+
     ~HDEEMConnection()
     {
         if (running_)
@@ -19,15 +28,6 @@ public:
         }
 
         thread_.join();
-    }
-
-    HDEEMConnection(HDEEMSource& source, const std::string& metric_prefix,
-                    const std::string& bmc_host, const std::string& bmc_user,
-                    const std::string& bmc_pw, const metricq::json& sensors,
-                    std::chrono::milliseconds interval)
-    : source_(source), metric_prefix_(metric_prefix), bmc_host_(bmc_host), bmc_user_(bmc_user),
-      bmc_pw_(bmc_pw), sensors_(sensors), interval_(interval)
-    {
     }
 
 public:

@@ -61,6 +61,12 @@ void HDEEMConnection::run()
                 for (auto& metric : metrics)
                 {
                     auto duration = stats.time(metric.id) - prev_stats.time(metric.id);
+
+                    if (duration.count() == 0)
+                    {
+                        continue;
+                    }
+
                     auto energy = stats.energy(metric.id) - prev_stats.energy(metric.id);
                     double avg_power = energy / (duration.count() * 1e-9);
 
