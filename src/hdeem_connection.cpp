@@ -32,7 +32,7 @@ void HDEEMConnection::run()
     {
         try
         {
-            Log::info(metric_prefix_) << "Connecting to " << bmc_host_;
+            Log::info(metric_prefix_) << "Trying to connect to: " << bmc_host_;
             hdeem::connection connection(bmc_host_, bmc_user_, bmc_pw_);
 
             std::vector<HDEEMMetric> metrics =
@@ -48,7 +48,7 @@ void HDEEMConnection::run()
             {
                 while (deadline <= std::chrono::high_resolution_clock::now())
                 {
-                    Log::warn() << "Skipping one measurement due to missed deadline";
+                    Log::warn(metric_prefix_) << "Skipping one measurement due to missed deadline";
                     deadline += interval_;
                 }
 
@@ -78,9 +78,7 @@ void HDEEMConnection::run()
         {
             // We only catch HDEEM errors, the remainder might be actual errors and not HDEEM does
             // HDEEM things
-            Log::error(metric_prefix_)
-                << "Failure in connection to " << bmc_host_ << ": " << e.what();
-            Log::info(metric_prefix_) << "Reseting connection to " << bmc_host_ << " in 5 seconds.";
+            Log::error(metric_prefix_) << "Failure in connection: " << e.what;
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }
