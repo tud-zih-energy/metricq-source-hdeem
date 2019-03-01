@@ -25,12 +25,7 @@ HDEEMSource::HDEEMSource(const std::string& manager_host, const std::string& tok
         }
         Log::info() << "Caught signal " << signal << ". Shutdown.";
 
-        running_ = false;
-        for (auto& connection : connections_)
-        {
-            connection->stop();
-        }
-
+        send_possible_ = false;
         stop();
     });
 
@@ -80,7 +75,7 @@ void HDEEMSource::on_source_config(const metricq::json& config)
 void HDEEMSource::on_source_ready()
 {
     Log::debug() << "HDEEMSource::on_source_ready() called";
-    running_ = true;
+    send_possible_ = true;
     for (auto& connection : connections_)
     {
         connection->start();
@@ -92,30 +87,32 @@ void HDEEMSource::on_error(const std::string& message)
     Log::debug() << "HDEEMSource::on_error() called";
     Log::error() << "Shit hits the fan: " << message;
     signals_.cancel();
-    running_ = false;
+
     for (auto& connection : connections_)
     {
         connection->stop();
     }
+
+    send_possible_ = false;
 }
 
 void HDEEMSource::on_closed()
 {
     Log::debug() << "HDEEMSource::on_closed() called";
     signals_.cancel();
-    running_ = false;
+    send_possible_ = false;
     for (auto& connection : connections_)
     {
         connection->stop();
     }
 }
 
-void HDEEMSource::async_write(const std::string& metric, metricq::TimePoint timestamp, double value)
+void HDEEMSource::async_send(const std::string& metric, metricq::TimePoint timestamp, double value)
 {
 
     // post this as a new task, so we can cross thread boundaries
     io_service.post([metric, timestamp, value, this]() {
-        if (!this->running_)
+        if (!this->send_possible_)
         {
             return;
         }
