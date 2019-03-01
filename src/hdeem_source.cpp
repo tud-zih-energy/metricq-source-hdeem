@@ -73,7 +73,7 @@ void HDEEMSource::on_source_config(const metricq::json& config)
 
                 auto& metric = (*this)[metric_name];
                 metric.metadata.unit("W");
-                metric.chunk_size(10);
+                metric.chunk_size(config.at("chunk_size").get<int>());
             }
         }
     }
