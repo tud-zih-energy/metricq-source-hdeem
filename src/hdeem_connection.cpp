@@ -40,11 +40,20 @@ void HDEEMConnection::run()
 
             auto prev_stats = connection.get_stats_total();
 
+            auto deadline = std::chrono::high_resolution_clock::now();
+            auto offset = deadline.time_since_epoch() % interval_;
+            deadline += interval_ - offset;
+
             while (!stop_requested_)
             {
-                // just wait some time, IMHO deadlines are pointless, as then a couple thousand
-                // thread will try to wake up at the same time. So just let us go with the flow
-                std::this_thread::sleep_for(interval_);
+                while (deadline <= std::chrono::high_resolution_clock::now())
+                {
+                    Log::warn() << "Skipping one measurement due to missed deadline";
+                    deadline += interval_;
+                }
+
+                std::this_thread::sleep_until(deadline);
+                deadline += interval_;
 
                 // get current readings
                 auto stats = connection.get_stats_total();
@@ -82,15 +91,17 @@ static std::vector<HDEEMMetric> initialize_metrics(hdeem::connection& connection
 {
     std::vector<HDEEMMetric> metrics;
 
-    for (auto& sensor_name : sensors)
+    for (auto& sensor_entry : sensors)
     {
-        std::string sensor = sensor_name.get<std::string>();
+        std::string sensor = sensor_entry.get<std::string>();
+        std::string sensor_upper = sensor;
+        std::transform(sensor_upper.begin(), sensor_upper.end(), sensor_upper.begin(), ::toupper);
 
         auto found = false;
 
         for (auto hdeem_id : connection.sensors())
         {
-            if (connection.sensor_real_name(hdeem_id) == sensor)
+            if (connection.sensor_real_name(hdeem_id) == sensor_upper)
             {
                 std::string metric = nitro::format("{}.{}") % prefix % sensor;
                 metrics.emplace_back(std::move(metric), hdeem_id);
