@@ -32,7 +32,7 @@ void HDEEMConnection::run()
     {
         try
         {
-            Log::info() << "Connecting to " << bmc_host_;
+            Log::info(metric_prefix_) << "Connecting to " << bmc_host_;
             hdeem::connection connection(bmc_host_, bmc_user_, bmc_pw_);
 
             std::vector<HDEEMMetric> metrics =
@@ -78,8 +78,9 @@ void HDEEMConnection::run()
         {
             // We only catch HDEEM errors, the remainder might be actual errors and not HDEEM does
             // HDEEM things
-            Log::error() << "Failure in connection to " << bmc_host_ << ": " << e.what();
-            Log::info() << "Reseting connection to " << bmc_host_ << " in 5 seconds.";
+            Log::error(metric_prefix_)
+                << "Failure in connection to " << bmc_host_ << ": " << e.what();
+            Log::info(metric_prefix_) << "Reseting connection to " << bmc_host_ << " in 5 seconds.";
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }
@@ -111,7 +112,7 @@ static std::vector<HDEEMMetric> initialize_metrics(hdeem::connection& connection
 
         if (!found)
         {
-            Log::warn() << "Couldn't find a sensor with the name: " << sensor;
+            Log::warn(metric_prefix_) << "Couldn't find a sensor with the name: " << sensor;
         }
     }
 
