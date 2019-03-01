@@ -112,7 +112,7 @@ static std::vector<HDEEMMetric> initialize_metrics(hdeem::connection& connection
 
         if (!found)
         {
-            Log::warn(metric_prefix_) << "Couldn't find a sensor with the name: " << sensor;
+            Log::warn(prefix) << "Couldn't find a sensor with the name: " << sensor;
         }
     }
 
