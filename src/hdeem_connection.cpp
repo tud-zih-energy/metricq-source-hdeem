@@ -78,7 +78,7 @@ void HDEEMConnection::run()
         {
             // We only catch HDEEM errors, the remainder might be actual errors and not HDEEM does
             // HDEEM things
-            Log::error(metric_prefix_) << "Failure in connection: " << e.what;
+            Log::error(metric_prefix_) << "Failure in connection: " << e.what();
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }
