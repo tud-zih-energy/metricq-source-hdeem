@@ -17,6 +17,8 @@ public:
         {
             stop();
         }
+
+        thread_.join();
     }
 
     HDEEMConnection(HDEEMSource& source, const std::string& metric_prefix,
@@ -50,7 +52,6 @@ public:
         }
 
         stop_requested_ = true;
-        thread_.join();
         running_ = false;
     }
 
