@@ -25,6 +25,12 @@ HDEEMSource::HDEEMSource(const std::string& manager_host, const std::string& tok
         }
         Log::info() << "Caught signal " << signal << ". Shutdown.";
 
+        running_ = false;
+        for (auto& connection : connections_)
+        {
+            connection->stop();
+        }
+
         stop();
     });
 
