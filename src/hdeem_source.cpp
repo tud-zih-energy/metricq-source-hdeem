@@ -114,19 +114,16 @@ void HDEEMSource::on_closed()
     }
 }
 
-void HDEEMSource::async_send(const std::vector<MetricTimeValues>& mtv)
+void HDEEMSource::async_send(const std::string& metric, metricq::TimePoint timestamp, double value)
 {
     // post this as a new task, so we can cross thread boundaries
-    io_service.post([mtv, this]() {
+    io_service.post([metric, timestamp, value, this]() {
         if (!this->send_possible_)
         {
             return;
         }
 
         // trigger the write to the metricq::Metric from the processing thread
-        for (const auto& entry : mtv)
-        {
-            (*this)[entry.metric].send({ entry.timestamp, entry.value });
-        }
+        (*this)[metric].send({ timestamp, value });
     });
 }

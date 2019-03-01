@@ -8,19 +8,7 @@
 #include <asio/signal_set.hpp>
 
 #include <memory>
-#include <tuple>
 #include <vector>
-
-struct MetricTimeValues
-{
-    MetricTimeValues(const std::string& metric) : metric(metric)
-    {
-    }
-
-    const std::string& metric;
-    metricq::TimePoint timestamp;
-    double value;
-};
 
 class HDEEMSource : public metricq::Source
 {
@@ -31,7 +19,7 @@ public:
     void on_error(const std::string& message) override;
     void on_closed() override;
 
-    void async_send(const std::vector<MetricTimeValues>& metric);
+    void async_send(const std::string& metric, metricq::TimePoint timestamp, double value);
 
 private:
     void on_source_config(const metricq::json& config) override;

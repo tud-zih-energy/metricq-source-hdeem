@@ -44,13 +44,6 @@ void HDEEMConnection::run()
             auto offset = deadline.time_since_epoch() % interval_;
             deadline += interval_ - offset;
 
-            std::vector<MetricTimeValues> mtv;
-
-            for (auto& metric : metrics)
-            {
-                mtv.emplace_back(metric.name);
-            }
-
             while (!stop_requested_)
             {
                 while (deadline <= std::chrono::high_resolution_clock::now())
@@ -65,7 +58,6 @@ void HDEEMConnection::run()
                 // get current readings
                 auto stats = connection.get_stats_total();
 
-                auto it = mtv.begin();
                 for (auto& metric : metrics)
                 {
                     auto duration = stats.time(metric.id) - prev_stats.time(metric.id);
@@ -76,14 +68,14 @@ void HDEEMConnection::run()
                     }
 
                     auto energy = stats.energy(metric.id) - prev_stats.energy(metric.id);
+                    double avg_power = energy / (duration.count() * 1e-9);
 
-                    it->timestamp = stats.time(metric.id);
-                    it->value = energy / (duration.count() * 1e-9);
+                    auto ts = stats.time(metric.id);
 
-                    ++it;
+                    // TODO this crappy sanity check
+
+                    source_.async_send(metric.name, ts, avg_power);
                 }
-
-                source_.async_send(mtv);
 
                 prev_stats = std::move(stats);
             }
