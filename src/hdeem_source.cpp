@@ -73,6 +73,12 @@ void HDEEMSource::on_source_config(const metricq::json& config)
 
                 auto& metric = (*this)[metric_name];
                 metric.metadata.unit("W");
+                metric.metadata.rate(config.at("rate").get<double>());
+                metric.metadata.scope(metricq::Metadata::Scope::last);
+                metric.metadata["bmc"] = bmc_hostname;
+                metric.metadata.description(
+                    nitro::format("HDEEM power measurements from '{}' of sensor '{}'") %
+                    bmc_hostname % sensor);
                 metric.chunk_size(config.at("chunk_size").get<int>());
             }
         }
