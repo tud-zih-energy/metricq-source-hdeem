@@ -68,7 +68,15 @@ void HDEEMSource::on_source_config(const metricq::json& config)
 
             for (std::string sensor : config.at("sensors"))
             {
-                auto metric_name = nitro::format("{}.{}.power") % metric_prefix % sensor;
+                std::string metric_name;
+                if (sensor == "blade")
+                {
+                    metric_name = nitro::format("{}.power") % metric_prefix;
+                }
+                else
+                {
+                    metric_name = nitro::format("{}.{}.power") % metric_prefix % sensor;
+                }
                 Log::debug() << "New metric: " << metric_name;
 
                 auto& metric = (*this)[metric_name];
