@@ -53,6 +53,8 @@ int main(int argc, char* argv[])
         Log::info() << "starting main loop.";
         source.main_loop();
         Log::info() << "exiting main loop.";
+
+        return 0;
     }
     catch (nitro::broken_options::parsing_error& e)
     {
@@ -63,5 +65,6 @@ int main(int argc, char* argv[])
     catch (std::exception& e)
     {
         Log::error() << "Unhandled exception: " << e.what();
+        return 2;
     }
 }
