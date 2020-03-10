@@ -74,7 +74,7 @@ void HDEEMConnection::run()
 
                     // TODO this crappy sanity check
 
-                    source_.async_send(metric.name, ts, avg_power);
+                    source_.async_send(*this, metric.name, ts, avg_power);
                 }
 
                 prev_stats = std::move(stats);

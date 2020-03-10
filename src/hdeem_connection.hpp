@@ -4,11 +4,13 @@
 #include <metricq/logger/nitro.hpp>
 
 #include <atomic>
+#include <chrono>
+#include <memory>
 #include <thread>
 
 class HDEEMSource;
 
-class HDEEMConnection
+class HDEEMConnection : public std::enable_shared_from_this<HDEEMConnection>
 {
 public:
     HDEEMConnection(HDEEMSource& source, const std::string& metric_prefix,

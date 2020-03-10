@@ -46,6 +46,16 @@ void HDEEMSource::on_source_config(const metricq::json& config)
 {
     Log::debug() << "HDEEMSource::on_source_config() called";
 
+    // for reconfige, we first stop all connection threads
+    for (auto& connection : connections_)
+    {
+        connection->stop();
+    }
+    connections_.clear();
+
+    // all threads are joined in the destructor, so we can now clear other state
+    clear_metrics();
+
     std::string metric_pattern = config.at("metric");
     std::string bmc_pattern = config.at("bmc").at("hostname");
 
@@ -91,11 +101,22 @@ void HDEEMSource::on_source_config(const metricq::json& config)
             }
         }
     }
+
+    // in case of reconfigure, start_measurement here, otherwise, on_source_ready will do it.
+    if (send_possible_)
+    {
+        start_measurements();
+    }
 }
 
 void HDEEMSource::on_source_ready()
 {
     Log::debug() << "HDEEMSource::on_source_ready() called";
+    start_measurements();
+}
+
+void HDEEMSource::start_measurements()
+{
     send_possible_ = true;
     for (auto& connection : connections_)
     {
@@ -128,11 +149,19 @@ void HDEEMSource::on_closed()
     }
 }
 
-void HDEEMSource::async_send(const std::string& metric, metricq::TimePoint timestamp, double value)
+void HDEEMSource::async_send(const HDEEMConnection& conn, const std::string& metric,
+                             metricq::TimePoint timestamp, double value)
 {
     // post this as a new task, so we can cross thread boundaries
-    io_service.post([metric, timestamp, value, this]() {
+    io_service.post([conn = conn.weak_from_this(), metric, timestamp, value, this]() {
         if (!this->send_possible_)
+        {
+            return;
+        }
+
+        // this thread is executed in the main thread, which is the only one calling the
+        // destructor so this check is fine
+        if (conn.expired())
         {
             return;
         }

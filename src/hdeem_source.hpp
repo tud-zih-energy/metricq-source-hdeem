@@ -19,14 +19,17 @@ public:
     void on_error(const std::string& message) override;
     void on_closed() override;
 
-    void async_send(const std::string& metric, metricq::TimePoint timestamp, double value);
+    void async_send(const HDEEMConnection& p, const std::string& metric,
+                    metricq::TimePoint timestamp, double value);
 
 private:
     void on_source_config(const metricq::json& config) override;
     void on_source_ready() override;
 
+    void start_measurements();
+
     asio::signal_set signals_;
 
-    std::vector<std::unique_ptr<HDEEMConnection>> connections_;
+    std::vector<std::shared_ptr<HDEEMConnection>> connections_;
     bool send_possible_ = false;
 };
